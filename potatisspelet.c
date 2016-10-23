@@ -17,7 +17,7 @@
 #define SKADA 1
 #define HP 2
 #define SPELNAMN "POTATIS-DUNGEON"
-#define VERSION "v160925"
+#define VERSION "v161023"
 #define LIN "--------------------------------------"
 
 /*
@@ -30,6 +30,7 @@ FIXAT:
 2016-09-25: Fixat textrutan, så den uppdaterar korrekt utan flimmer
 2016-09-25: Minskat spelytan, annars fungerade inte på min laptop med lägre upplösning
 2016-09-25: Börjat arbeta med fiender, de har initialt en simpel AI och jagar spelaren
+2016-10-23: Experient med färg
 
 
 ATT GÖRA:
@@ -66,7 +67,6 @@ POTATISAR: Check för random, så två inte hamnar på samma koordinater
 VARIABLER: Lägg i funktioner?
 FUNKTIONER: Egna filer, denna kommer snart bli stor
 ACHIEVEMENTS: Det har alla spel
-FÄRG?
 FÅ BORT MARKÖR FRÅN SPELAREN
 FÖRSTA FIENDEN: Blir D (får ej rätt typ 1/2 etc) -- tror fixat
 FIXA SÅ FIENDER EJ GÅR IN I VARANDRA, OCH KROCKAR MED SPELAREN!
@@ -326,13 +326,17 @@ void monster_move(_Bool Action){
 		case SLEMTROLL:
 			monsterTypNamn = "S";
 			monsterTypNamnFull = "Slemtroll";
+			wattron(MainFonster, COLOR_PAIR(2));
 			break;
 		case KODSKELLET:
 			monsterTypNamn = "K";
+			wattron(MainFonster, COLOR_PAIR(5));
 			monsterTypNamnFull = "Kodskelett";
 			break;
 		}
 		mvwprintw(MainFonster, monster_y[i],monster_x[i], "%s", monsterTypNamn);
+		wattroff(MainFonster, COLOR_PAIR(5));
+		wattroff(MainFonster, COLOR_PAIR(2));
 	}
 	if(Action){ //Körs om funktionen matas med 1 
 		/* 
@@ -387,11 +391,34 @@ int main(){
 	initscr();	//Intierar fönster/grafik etc ?? - curses.h
 	clear();		//Rensar skärmen - curses.h
 	cbreak(); 	//? - curses.h
-	noecho();	//? - curses.h
+	//noecho();	//? - curses.h
 	srand(time(NULL));
+	start_color();
+
+    //(void) initscr();      /* initialize the curses library */
+    keypad(stdscr, TRUE);  /* enable keyboard mapping */
+    (void) nonl();         /* tell curses not to do NL->CR/NL on output */
+   // (void) cbreak();       /* take input chars one at a time, no wait for \n */
+    (void) echo();         /* echo input - in color */
+
+
+        /*
+         * Simple color assignment, often all we need.  Color pair 0 cannot
+         * be redefined.  This example uses the same value for the color
+         * pair as for the foreground color, though of course that is not
+         * necessary:
+         */
+        init_pair(1, COLOR_RED,     COLOR_BLACK);
+        init_pair(2, COLOR_GREEN,   COLOR_BLACK);
+        init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
+        init_pair(4, COLOR_BLUE,    COLOR_BLACK);
+        init_pair(5, COLOR_CYAN,    COLOR_BLACK);
+        init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+        init_pair(7, COLOR_WHITE,   COLOR_BLACK);
 	/*
 	forsatsen sätter samtliga element i arrayen texthistory till " "
 	*/
+
 	for (int i=0;i<TEXTFONSTER_LINJER-3;i++){
 		TextHistory[i] = " ";
 	}
@@ -429,7 +456,9 @@ int main(){
 			radera_fonster();
 			Potatisar();
 			info();
+			wattron(MainFonster, COLOR_PAIR(1));
 			mvwprintw(MainFonster, y, x, "@");
+			wattroff(MainFonster, COLOR_PAIR(1));
 			jkinfo();
 			textruta(0,"N/A");
 			uppdatera_fonster();
